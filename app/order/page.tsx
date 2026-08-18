@@ -13,49 +13,68 @@ export default function PlaceOrderPage() {
   const [type, setType] = useState<"service" | "product">("service");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [fileWarning, setFileWarning] = useState("");
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setLoading(true);
     setError("");
+    setFileWarning("");
+
     const form = new FormData(event.currentTarget);
     const item = String(form.get("item") || "").trim();
     const file = form.get("file");
 
-    const { data: order, error: orderError } = await supabase.from("orders").insert({
-      customer_name: String(form.get("name") || "").trim(),
-      customer_phone: String(form.get("phone") || "").trim(),
-      service: type === "service" ? item : null,
-      product: type === "product" ? item : null,
-      quantity: String(form.get("quantity") || "").trim(),
-      required_date: String(form.get("date") || "") || null,
-      requirement: String(form.get("message") || "").trim(),
-      delivery_address: String(form.get("address") || "").trim() || null,
-    }).select("id, order_number").single();
+    const { data, error: orderError } = await supabase.rpc("submit_order", {
+      p_customer_name: String(form.get("name") || "").trim(),
+      p_customer_phone: String(form.get("phone") || "").trim(),
+      p_service: type === "service" ? item : null,
+      p_product: type === "product" ? item : null,
+      p_quantity: String(form.get("quantity") || "").trim() || null,
+      p_required_date: String(form.get("date") || "") || null,
+      p_requirement: String(form.get("message") || "").trim(),
+      p_delivery_address: String(form.get("address") || "").trim() || null,
+    });
 
-    if (orderError || !order) {
+    if (orderError || !data?.[0]?.order_number) {
       setLoading(false);
       setError(orderError?.message || "Could not create the order. Please try again.");
       return;
     }
 
+    const createdOrderId = data[0].order_id;
+    const createdOrderNumber = data[0].order_number;
+
     if (file instanceof File && file.size > 0) {
       const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "-");
-      const path = `${order.id}/${Date.now()}-${safeName}`;
+      const path = `${createdOrderId}/${Date.now()}-${safeName}`;
       const { error: uploadError } = await supabase.storage.from("order-files").upload(path, file, { upsert: false });
-      if (!uploadError) {
-        await supabase.from("order_files").insert({ order_id: order.id, storage_path: path, original_name: file.name, mime_type: file.type || null, size_bytes: file.size });
+
+      if (uploadError) {
+        setFileWarning("Order create ho gaya hai, lekin design file upload nahi ho payi. Aap Order ID se order track kar sakte hain.");
+      } else {
+        const { error: fileRowError } = await supabase.from("order_files").insert({
+          order_id: createdOrderId,
+          storage_path: path,
+          original_name: file.name,
+          mime_type: file.type || null,
+          size_bytes: file.size,
+        });
+        if (fileRowError) {
+          setFileWarning("Order create ho gaya hai, lekin uploaded file ko order se attach nahi kiya ja saka.");
+        }
       }
     }
 
-    await supabase.from("order_status_history").insert({ order_id: order.id, status: "pending", note: "Order received" });
-    setOrderNumber(order.order_number);
-    localStorage.setItem("sagarDigitalLastOrder", order.order_number);
+    setOrderNumber(createdOrderNumber);
+    localStorage.setItem("sagarDigitalLastOrder", createdOrderNumber);
     setSubmitted(true);
     setLoading(false);
   }
 
-  const whatsappUrl = orderNumber ? `https://wa.me/919523265948?text=${encodeURIComponent(`Hello Sagar Digital, my Order ID is ${orderNumber}`)}` : "#";
+  const whatsappUrl = orderNumber
+    ? `https://wa.me/919523265948?text=${encodeURIComponent(`Hello Sagar Digital, my Order ID is ${orderNumber}`)}`
+    : "#";
 
   if (submitted) {
     return (
@@ -68,6 +87,7 @@ export default function PlaceOrderPage() {
             <span className="break-all text-xl font-black tracking-wide text-red-700">{orderNumber}</span>
             <button onClick={() => navigator.clipboard?.writeText(orderNumber)} className="shrink-0 rounded-lg bg-white px-3 py-2 text-xs font-bold text-slate-800 shadow-sm">Copy</button>
           </div>
+          {fileWarning && <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50 p-3 text-left text-sm font-semibold text-amber-700">{fileWarning}</div>}
           <p className="mt-4 text-sm text-slate-500">Order ID ko save kar lena. Isse bina login order track kar sakte ho.</p>
           <div className="mt-7 grid gap-3 sm:grid-cols-3">
             <Link href={`/track-order?id=${encodeURIComponent(orderNumber)}`} className="rounded-xl bg-red-600 px-4 py-3 text-sm font-bold text-white">Track Order</Link>
