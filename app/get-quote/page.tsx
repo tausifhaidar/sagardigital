@@ -24,22 +24,25 @@ export default function GetQuotePage() {
     event.preventDefault();
     setLoading(true);
     setError("");
+
     const form = new FormData(event.currentTarget);
-    const { data, error } = await supabase.from("quote_requests").insert({
-      name: String(form.get("name") || "").trim(),
-      phone: String(form.get("phone") || "").trim(),
-      service: String(form.get("service") || "").trim(),
-      quantity: String(form.get("quantity") || "").trim() || null,
-      required_date: String(form.get("date") || "") || null,
-      message: String(form.get("message") || "").trim(),
-    }).select("quote_number").single();
+    const { data, error: submitError } = await supabase.rpc("submit_quote_request", {
+      p_name: String(form.get("name") || "").trim(),
+      p_phone: String(form.get("phone") || "").trim(),
+      p_service: String(form.get("service") || "").trim(),
+      p_quantity: String(form.get("quantity") || "").trim() || null,
+      p_required_date: String(form.get("date") || "") || null,
+      p_message: String(form.get("message") || "").trim(),
+    });
 
     setLoading(false);
-    if (error) {
-      setError(error.message);
+
+    if (submitError || !data?.[0]?.quote_number) {
+      setError(submitError?.message || "Could not submit request. Please try again or WhatsApp us.");
       return;
     }
-    setQuoteNumber(data.quote_number);
+
+    setQuoteNumber(data[0].quote_number);
     setSubmitted(true);
   }
 
@@ -62,15 +65,15 @@ export default function GetQuotePage() {
             <label className="text-sm font-semibold text-slate-700 md:col-span-2">Requirement / Message<textarea required name="message" rows={5} className="mt-2 w-full rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-red-500" placeholder="Tell us about your requirement..." /></label>
           </div>
 
-          <button disabled={loading} type="submit" className="mt-6 w-full rounded-xl bg-red-600 px-6 py-3.5 font-bold text-white transition hover:bg-red-700 disabled:opacity-60">{loading ? "Submitting..." : "Submit Quote Request"}</button>
+          <button disabled={loading || submitted} type="submit" className="mt-6 w-full rounded-xl bg-red-600 px-6 py-3.5 font-bold text-white transition hover:bg-red-700 disabled:opacity-60">{loading ? "Submitting..." : submitted ? "Submitted" : "Submit Quote Request"}</button>
 
-          {error && <div className="mt-5 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm font-semibold text-red-700">Could not submit request. Please try again or WhatsApp us.</div>}
+          {error && <div className="mt-5 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm font-semibold text-red-700">{error}</div>}
 
           {submitted && (
             <div className="mt-5 rounded-2xl border border-green-200 bg-green-50 p-4 text-sm font-semibold text-green-700">
               Quote request submitted successfully. Your reference is <span className="font-black">{quoteNumber}</span>.
               <div className="mt-3 flex flex-wrap gap-3">
-                <a href={`https://wa.me/919523265948?text=Hello%20Sagar%20Digital,%20my%20quote%20reference%20is%20${quoteNumber}`} target="_blank" rel="noreferrer" className="rounded-lg bg-green-600 px-4 py-2 text-white">WhatsApp</a>
+                <a href={`https://wa.me/919523265948?text=${encodeURIComponent(`Hello Sagar Digital, my quote reference is ${quoteNumber}`)}`} target="_blank" rel="noreferrer" className="rounded-lg bg-green-600 px-4 py-2 text-white">WhatsApp</a>
                 <Link href="/order" className="rounded-lg bg-red-600 px-4 py-2 text-white">Place Order</Link>
               </div>
             </div>
