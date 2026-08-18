@@ -8,6 +8,7 @@ const navItems = [
   { name: "Home", href: "/" },
   { name: "Services", href: "/services" },
   { name: "Products", href: "/products" },
+  { name: "Orders", href: "/order" },
   { name: "Portfolio", href: "/portfolio" },
   { name: "About", href: "/about" },
   { name: "Track Order", href: "/track-order" },
@@ -25,9 +26,7 @@ export default function Header() {
         </Link>
 
         <nav className="hidden items-center gap-6 xl:gap-7 lg:flex">
-          {navItems.map((item) => (
-            <Link key={item.name} href={item.href} className="text-sm font-semibold text-slate-700 transition-colors hover:text-red-600">{item.name}</Link>
-          ))}
+          {navItems.map((item) => <Link key={item.name} href={item.href} className="text-sm font-semibold text-slate-700 transition-colors hover:text-red-600">{item.name}</Link>)}
           <Link href="/get-quote" className="rounded-xl bg-red-600 px-5 py-3 text-sm font-bold text-white shadow-md transition hover:bg-red-700">Get a Quote</Link>
         </nav>
 
@@ -36,16 +35,7 @@ export default function Header() {
         </button>
       </div>
 
-      {menuOpen && (
-        <div className="border-t border-slate-200 bg-white lg:hidden">
-          <nav className="mx-auto flex max-w-7xl flex-col px-4 py-4 sm:px-6">
-            {navItems.map((item) => (
-              <Link key={item.name} href={item.href} onClick={() => setMenuOpen(false)} className="border-b border-slate-100 py-3 text-sm font-semibold text-slate-700 hover:text-red-600">{item.name}</Link>
-            ))}
-            <Link href="/get-quote" onClick={() => setMenuOpen(false)} className="mt-4 rounded-xl bg-red-600 px-5 py-3 text-center text-sm font-bold text-white">Get a Quote</Link>
-          </nav>
-        </div>
-      )}
+      {menuOpen && <div className="border-t border-slate-200 bg-white lg:hidden"><nav className="mx-auto flex max-w-7xl flex-col px-4 py-4 sm:px-6">{navItems.map((item) => <Link key={item.name} href={item.href} onClick={() => setMenuOpen(false)} className="border-b border-slate-100 py-3 text-sm font-semibold text-slate-700 hover:text-red-600">{item.name}</Link>)}<Link href="/get-quote" onClick={() => setMenuOpen(false)} className="mt-4 rounded-xl bg-red-600 px-5 py-3 text-center text-sm font-bold text-white">Get a Quote</Link></nav></div>}
     </header>
   );
 }
