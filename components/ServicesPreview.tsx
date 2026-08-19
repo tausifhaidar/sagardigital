@@ -1,13 +1,13 @@
 import Link from "next/link";
 
 const services = [
-  "Flex Printing",
-  "Eco Solvent Printing",
-  "Glow Sign Board",
-  "Vinyl Printing",
-  "Hoarding Board",
-  "Paper Printing — All",
-  "Stationery Items",
+  { title: "Flex Printing", image: "/flex-printing.png" },
+  { title: "Eco Solvent Printing", image: "/eco-solvent-printing.png" },
+  { title: "Glow Sign Board", image: "/glow-sign-board.png" },
+  { title: "Vinyl Printing", image: "/vinyl-printing.png" },
+  { title: "Hoarding Board", image: "/hoarding-board.png" },
+  { title: "Paper Printing — All", image: "/paper-printing.png" },
+  { title: "Stationery Items", image: "/stationery-item.png" },
 ];
 
 export default function ServicesPreview() {
@@ -22,11 +22,15 @@ export default function ServicesPreview() {
 
         <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
           {services.map((service) => (
-            <Link key={service} href="/services" className="group rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:border-red-200 hover:shadow-lg">
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-red-50 font-black text-red-600">SD</div>
-              <h3 className="mt-5 font-bold text-slate-900">{service}</h3>
-              <p className="mt-2 text-sm text-slate-500">View service details and request a quote.</p>
-              <span className="mt-4 inline-block text-sm font-bold text-red-600">Explore →</span>
+            <Link key={service.title} href="/services" className="group overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:border-red-200 hover:shadow-lg">
+              <div className="aspect-[16/10] overflow-hidden bg-slate-100">
+                <img src={service.image} alt={service.title} className="h-full w-full object-cover transition duration-300 group-hover:scale-105" loading="lazy" />
+              </div>
+              <div className="p-5">
+                <h3 className="font-bold text-slate-900">{service.title}</h3>
+                <p className="mt-2 text-sm text-slate-500">View service details and request a quote.</p>
+                <span className="mt-4 inline-block text-sm font-bold text-red-600">Explore →</span>
+              </div>
             </Link>
           ))}
         </div>
