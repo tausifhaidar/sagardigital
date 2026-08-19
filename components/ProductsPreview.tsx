@@ -1,12 +1,12 @@
 import Link from "next/link";
 
 const products = [
-  "Flex Printing Machine",
-  "Eco Solvent Printing Machine",
-  "Flex Machine Ink",
-  "Solvent Ink",
-  "Flex Roll",
-  "Flex Bond",
+  { title: "Flex Printing Machine", image: "/flex-printing-machine.png" },
+  { title: "Eco Solvent Printing Machine", image: "/eco-solvent-printing-machine copy.png" },
+  { title: "Flex Machine Ink", image: "/flex-machine-ink.png" },
+  { title: "Solvent Ink", image: "/solvent-ink.png" },
+  { title: "Flex Roll", image: "/flex-roll.png" },
+  { title: "Flex Bond", image: "/flex-bond.png" },
 ];
 
 export default function ProductsPreview() {
@@ -24,11 +24,15 @@ export default function ProductsPreview() {
 
         <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {products.map((product) => (
-            <Link key={product} href="/products" className="rounded-2xl border border-slate-200 p-6 transition hover:-translate-y-1 hover:border-red-200 hover:shadow-lg">
-              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-100 font-black text-slate-700">SD</div>
-              <h3 className="mt-5 font-bold text-slate-900">{product}</h3>
-              <p className="mt-2 text-sm leading-6 text-slate-500">Product details and enquiry available.</p>
-              <span className="mt-4 inline-block text-sm font-bold text-red-600">Enquire Now →</span>
+            <Link key={product.title} href="/products" className="group overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:border-red-200 hover:shadow-lg">
+              <div className="aspect-[16/10] overflow-hidden bg-slate-100">
+                <img src={product.image} alt={product.title} className="h-full w-full object-cover transition duration-300 group-hover:scale-105" loading="lazy" />
+              </div>
+              <div className="p-5">
+                <h3 className="font-bold text-slate-900">{product.title}</h3>
+                <p className="mt-2 text-sm leading-6 text-slate-500">Product details and enquiry available.</p>
+                <span className="mt-4 inline-block text-sm font-bold text-red-600">Enquire Now →</span>
+              </div>
             </Link>
           ))}
         </div>
