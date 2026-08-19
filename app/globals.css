@@ -18,3 +18,42 @@ body {
 * {
   box-sizing: border-box;
 }
+
+@keyframes heroOrbit {
+  0%, 100% { transform: rotate(0deg) scale(1); opacity: .45; }
+  50% { transform: rotate(8deg) scale(1.02); opacity: .9; }
+}
+
+@keyframes heroFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+.hero-orbit {
+  animation: heroOrbit 8s ease-in-out infinite;
+}
+
+.hero-orbit-delay {
+  animation-delay: -4s;
+}
+
+.float-card {
+  animation: heroFloat 4s ease-in-out infinite;
+}
+
+.float-card-delay {
+  animation-delay: -2s;
+}
+
+.hero-grid {
+  background-image: linear-gradient(rgba(255,255,255,.06) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.06) 1px, transparent 1px);
+  background-size: 48px 48px;
+  mask-image: radial-gradient(circle at center, black 20%, transparent 75%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-orbit,
+  .float-card {
+    animation: none;
+  }
+}
